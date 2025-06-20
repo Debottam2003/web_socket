@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #chatting_area {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #chatting_area {
+            margin: 10px 0;
+            background-color: #e6f3ff;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .own-msg {
+            background-color: rgba(233, 233, 60, 0.966);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: right;
+        }
+        .incoming-msg {
+            background-color: rgb(236, 139, 43);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Simple Socket.IO Chat</h1>
+    <div id="chatting_area"></div>
+    <form>
+        <input type="text" name="receiver" id="receiver" value="" placeholder="Enter receiver's name" required />
+        <div>
+        <input type="text" name="msg" value="" placeholder="Type your message..." id="msg" required autocomplete="off" />
+        <button type="submit" id="send">Send</button>
+        </div>
+    </form>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        let sender = localStorage.getItem("user");
+        const chatting_area = document.getElementById("chatting_area");
+        const form = document.querySelector("form");
+        const socket = io("http://localhost:3333");
+
+        socket.on("connection", (ack) => {
+            console.log(ack);
+        });
+
+        socket.emit("register", sender);
+
+        socket.on("registerACK", (ack) => {
+            console.log(ack);
+        });
+
+        // Display reply from server
+        socket.on("reply", (message) => {
+            const new_msg = document.createElement("h3");
+            new_msg.textContent = message.msg;
+            new_msg.classList.add("incoming-msg");
+
+            chatting_area.appendChild(new_msg);
+        });
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let msg = document.getElementById("msg").value.trim();
+
+            const own_msg = document.createElement("h3");
+            own_msg.textContent = msg;
+            own_msg.classList.add("own-msg");
+
+            chatting_area.appendChild(own_msg);
+
+            let receiver = document.getElementById("receiver").value.trim();
+            if (!msg) return;
+            socket.emit("message", {sender, msg, receiver});
+            document.getElementById("msg").value = "";
+            // form.reset();
+        });
+    </script>
+</body>
+
+</html>
