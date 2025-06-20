@@ -1,4 +1,9 @@
 let sender = localStorage.getItem("user");
+if (sender) {
+
+const username = document.getElementById("username");
+username.textContent = sender;
+    
 const chatting_area = document.getElementById("chatting_area");
 const form = document.querySelector("form");
 const socket = io("http://localhost:3333");
@@ -38,3 +43,8 @@ form.addEventListener("submit", (e) => {
     document.getElementById("msg").value = "";
     // form.reset();
 });
+}
+else {
+    alert("Please login first to chat.");
+    window.location.href = "login.html";
+}
