@@ -4,95 +4,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Socket.IO Chat</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 30px;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #f1f1f1;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1,
+        #username {
+            text-align: center;
+            margin: 6px 0;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        #chatting_area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+            background: linear-gradient(180deg, #0d0d0d, #1a1a1a 60%, #202c2c 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scroll-behavior: smooth;
+        }
+
+        .own-msg,
+        .incoming-msg {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .own-msg {
+            align-self: flex-end;
+            background: #038142;
+            color: #fff;
+            border-bottom-right-radius: 0;
+        }
+
+        .incoming-msg {
+            align-self: flex-start;
+            background: #2f2f2f;
+            color: #f1f1f1;
+            border-bottom-left-radius: 0;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .incoming-msg .timestamp {
+            text-align: left;
+        }
+
+        .own-img-msg,
+        .incoming-img-msg {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .incoming-img-msg {
+            align-items: flex-start;
+        }
+
+        img {
+            max-width: 180px;
+            height: auto;
+            border-radius: 12px;
+            margin-top: 4px;
         }
 
         form {
             display: flex;
             flex-direction: column;
+            background: #1e1e1e;
+            padding: 10px;
+            border-top: 1px solid #2c2c2c;
+        }
+
+        .form-row {
+            display: flex;
             gap: 10px;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 500px;
+            margin-bottom: 10px;
+        }
+
+        .form-row input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #2d2d2d;
+            color: #fff;
+        }
+
+        .form-row-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #msg {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 24px;
+            background: #2c2c2c;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        #send {
+            background-color: #25d366;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #send:hover {
+            background-color: #1ebe5b;
+        }
+
+        .file-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-file-label {
+            background: #5865f2;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .custom-file-label:hover {
+            background: #4752c4;
+        }
+
+        #file-name {
+            font-size: 13px;
+            color: #aaa;
+            font-style: italic;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
+        }
+
+        #logout {
+            background-color: #a83232;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 6px auto;
+        }
+
+        #logout:hover {
+            background-color: #912727;
+        }
+
+        @media (max-width: 600px) {
+
+            .own-msg,
+            .incoming-msg {
+                max-width: 90%;
+                font-size: 14px;
+            }
+
+            #msg {
+                font-size: 14px;
+            }
+
+            #send {
+                width: 44px;
+                height: 44px;
+            }
         }
 
         input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 12px 20px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #chatting_area {
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            min-height: 200px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-        }
-
-        #chatting_area {
-            margin: 10px 0;
-            background-color: #e6f3ff;
-            padding: 10px;
-            border-radius: 6px;
-        }
-
-        .own-msg {
-            background-color: rgba(233, 233, 60, 0.966);
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: right;
-        }
-        .incoming-msg {
-            background-color: rgb(236, 139, 43);
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: left;
+            outline: none;
         }
     </style>
-</head>
 
 <body>
-    <h1>Simple Socket.IO Chat</h1>
-    <h2 id="username"></h2>
+    <h1>Socket.IO Chat</h1>
+    <h2 id="username">@username</h2>
+
     <div id="chatting_area"></div>
+
     <form>
-        <input type="text" name="receiver" id="receiver" value="" placeholder="Enter receiver's name" required />
-        <div>
-        <input type="text" name="msg" value="" placeholder="Type your message..." id="msg" required autocomplete="off" />
-        <button type="submit" id="send">Send</button>
+        <div class="form-row">
+            <input type="text" id="receiver" placeholder="Receiver's name" required />
+        </div>
+        <div class="form-row file-upload-wrapper">
+            <label for="document" class="custom-file-label">File</label>
+            <input type="file" id="document" style="display:none;" />
+            <span id="file-name">No file chosen</span>
+        </div>
+        <div class="form-row-message">
+            <input type="text" id="msg" placeholder="Type a message..." autocomplete="off" />
+            <button type="submit" id="send">➤</button>
         </div>
     </form>
 
+    <button id="logout">Log Out</button>
+
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="./script.js"></script>
+    <script src="./simple.js"></script>
+    <script>
+        document.getElementById('document').addEventListener('change', function (e) {
+            const fileName = e.target.files.length ? e.target.files[0].name : 'No file chosen';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Example: you can call this when adding a message
+        function appendMessage(msg, type = "incoming") {
+            const div = document.createElement('div');
+            div.className = type === "own" ? 'own-msg' : 'incoming-msg';
+            div.innerHTML = `${msg}<div class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
+            document.getElementById('chatting_area').appendChild(div);
+            document.getElementById('chatting_area').scrollTop = document.getElementById('chatting_area').scrollHeight;
+        }
+    </script>
 </body>
 
 </html>

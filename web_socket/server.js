@@ -9,13 +9,21 @@ let users = {};
 const app = express();
 
 app.use(cors({
-    orirgin: "*", // Adjust this to your frontend URL
+    origin: "*", // Adjust this to your frontend URL
     methods: ["GET", "POST"],
 }));
 
 const http_server = http.createServer(app);
 
-const io = new Server(http_server, { cors: { origin: "*" } });
+const io = new Server(http_server, {
+    cors: {
+        origin: "*",            // Allow all origins (adjust for production)
+        methods: ["GET", "POST"] // Allowed HTTP methods
+    },
+    // Critical performance settings for file uploads
+    maxHttpBufferSize: 16 * 1024 * 1024,  // 16MB max payload (for 2MB files + overhead)
+    // whatsapp like settings
+});
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
@@ -25,9 +33,9 @@ app.get("/", (req, res) => {
 
 app.post("/login", async (req, res) => {
     console.log("Login request received:", req.body);
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).json({message: "Email and password are required"});
+        return res.status(400).json({ message: "Email and password are required" });
     }
     try {
         const query = "SELECT email FROM users WHERE email = $1 AND password = $2";
@@ -36,13 +44,13 @@ app.post("/login", async (req, res) => {
         if (result.rows.length > 0) {
             const user = result.rows[0].email;
             console.log(user);
-            res.status(200).json({message: "Login successful", user});
+            res.status(200).json({ message: "Login successful", user });
         } else {
-            res.status(401).json({message: "Invalid email or password"});
+            res.status(401).json({ message: "Invalid email or password" });
         }
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 
@@ -50,8 +58,12 @@ io.on('connection', (socket) => {
 
     // When a new user connects, we can log their socket ID
     // and store the socketid in the users object
+    let sender = socket.handshake.query.sender;
+    if (sender) {
+        users[sender] = socket.id;
+    }
 
-    socket.emit("connection", `welcome ${socket.id}`);
+    socket.emit("welcome", `welcome ${socket.id}`);
 
     socket.on("register", (user) => {
         users[user] = socket.id;
@@ -63,11 +75,13 @@ io.on('connection', (socket) => {
     socket.on("message", (...args) => {
         console.log(args);
         // Server emiting data on reply event
-        const {sender, msg, receiver} = args[0];
+        const { sender, msg, imageSTR, receiver } = args[0];
         users[sender] = socket.id;
         console.log(users);
+        console.log("Buffer Object:", imageSTR);
+        // console.log(imageSTR, msg);
         // socket.broadcast.emit("reply", msg);
-        io.to(users[receiver]).emit("reply", {sender, msg});
+        io.to(users[receiver]).emit("reply", { sender, msg, imageSTR });
     });
 
     console.log(socket.id);
@@ -79,6 +93,25 @@ io.on('connection', (socket) => {
     // socket.broadcast.emit() → sends to everyone except the current socket.
 
     // io.emit() → sends to everyone including the sender.
+
+    // io.to(socket.id).emit() → sends to a specific socket.
+
+    // socket.on("disconnect") → listens for the disconnection of a socket 
+    // (when manul call or close tab or network issue).
+    // When a user disconnects, we can log their socket ID
+    // and clean up the users object
+    socket.on("disconnect", () => {
+        console.log(socket.id + " user is disconnected.");
+        // Clean up users object
+        for (let [username, id] of Object.entries(users)) {
+            if (id === socket.id) {
+                delete users[username];
+                console.log(`Removed ${username} from users. And closed the socket connection.`);
+                break;
+            }
+        }
+    });
+
 
 });
 

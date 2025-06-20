@@ -1,0 +1,60 @@
+Uint8Array — "Unsigned 8-bit Integer Array"
+It’s a typed array in JavaScript that stores a sequence of 8-bit unsigned integers, meaning:
+    Each element is an integer between 0 and 255 (2⁸ - 1)
+    All values are non-negative (unsigned)
+    It is a view over an ArrayBuffer
+
+// *** Good for image/video previews, quick in-browser use.
+url = URL.createObjectURL(file);
+
+🧠 ArrayBuffer — What It Is:
+A raw, contiguous block of memory.
+An ArrayBuffer is a raw, fixed-length block of memory — like a chunk of binary data in RAM.
+But on its own, it has no idea what the data means (is it characters? floats? bytes?).
+You need a typed view like Uint8Array, Float32Array, etc., to interpret or manipulate it.
+🧃 Analogy:
+Imagine a plain notebook with 1024 empty pages.
+That's ArrayBuffer(1024) — just empty, undivided memory.
+
+🧱 What is a Blob?
+A Blob (Binary Large Object) is a high-level representation of binary data — like files, images, videos, etc.
+You can think of it as a file-like object in memory that the browser understands and can use easily.
+
+ArrayBuffer : Raw memory blocks (just raw bytes no meaning and structure) 
+// just a chunk of memory // sequence of 0s and 1s
+
+Uint8Array : A typed array that provides a view of the ArrayBuffer as 8-bit unsigned integers
+// it is a view over an ArrayBuffer : Byte-by-byte view
+
+Blob	    : A meaningful, packaged file understands by browser pdf/image/video
+
+*** 📁 File → ArrayBuffer → Uint8Array → Blob → URL.createObjectURL()
+
+
+
+const buffer = new ArrayBuffer(4); // 4 bytes
+const uint8 = new Uint8Array(buffer);     // View it as 4 x 8-bit unsigned ints
+uint8[0] = 255;
+console.log(uint8); // Output: Uint8Array(4) [ 255, 0, 0, 0 ]
+const int16 = new Int16Array(buffer);     // View it as 2 x 16-bit signed ints
+console.log(int16);
+
+
+
+Base64 is a way to encode binary data (like images, PDFs, or any file) 
+into a text string using only 64 safe ASCII characters:
+
+    Uppercase letters (A-Z)
+
+    Lowercase letters (a-z)
+
+    Numbers (0-9)
+
+    Special characters +, /, and = (for padding)
+
+
+Why Use Base64 Instead of Binary?
+✅ Works with JSON (Socket.IO prefers strings over binary)
+✅ No transport switching (Avoids WebSocket → HTTP downgrade)
+✅ Easier debugging (Base64 strings are readable in logs)
+✅ Works in all browsers (No ArrayBuffer compatibility issues)
