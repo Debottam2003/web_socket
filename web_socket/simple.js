@@ -26,6 +26,11 @@ if (sender) {
         console.log(ack);
     });
 
+    socket.on("receiverNotFound", (message) => {
+        console.error(message);
+        alert(message);
+    });
+
     // Display reply from server
     socket.on("reply", (message) => {
         console.log(message);

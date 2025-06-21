@@ -81,6 +81,12 @@ io.on('connection', (socket) => {
         console.log("Buffer Object:", imageSTR);
         // console.log(imageSTR, msg);
         // socket.broadcast.emit("reply", msg);
+        if(!users[receiver]) {
+            console.log(`User ${receiver} is not connected yet.`);
+            socket.emit("receiverNotFound", `User ${receiver} is not connected.`);
+            // Optionally, you can store the message for later delivery
+            return;
+        }
         io.to(users[receiver]).emit("reply", { sender, msg, imageSTR });
     });
 
