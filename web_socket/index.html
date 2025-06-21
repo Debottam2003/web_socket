@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Socket.IO Chat</title>
+    <title>Let's Chat</title>
     <style>
         * {
             box-sizing: border-box;
@@ -23,9 +23,8 @@
             overflow: hidden;
         }
 
-        h1,
-        #username {
-            text-align: center;
+        #username, #receiver {
+            text-align: left;
             margin: 6px 0;
             font-weight: 500;
             color: #e0e0e0;
@@ -221,15 +220,13 @@
     </style>
 
 <body>
-    <h1>Socket.IO Chat</h1>
+    <h1>Let's Chat</h1>
     <h2 id="username">@username</h2>
+    <h2 id="receiver">ChatWith</h2>
 
     <div id="chatting_area"></div>
 
     <form>
-        <div class="form-row">
-            <input type="text" id="receiver" placeholder="Receiver's name" required />
-        </div>
         <div class="form-row file-upload-wrapper">
             <label for="document" class="custom-file-label">File</label>
             <input type="file" id="document" style="display:none;" />

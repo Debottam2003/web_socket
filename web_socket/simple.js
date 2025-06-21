@@ -1,10 +1,13 @@
 
 let sender = localStorage.getItem("user");
+let receiver = localStorage.getItem("receiver");
 // If user is not logged in, redirect to login page
 
-if (sender) {
+if (sender && receiver) {
     const username = document.getElementById("username");
-    username.textContent = sender;
+    username.textContent = `You: ${sender}`;
+    const receiverName = document.getElementById("receiver");
+    receiverName.textContent += `: ${receiver}`;
 
     const chatting_area = document.getElementById("chatting_area");
     const form = document.querySelector("form");
@@ -39,6 +42,8 @@ if (sender) {
             new_msg.textContent = message.msg;
             new_msg.classList.add("incoming-msg");
             chatting_area.appendChild(new_msg);
+            
+            //*** Scroll to the bottom of the chat area
             chatting_area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
         }
         if (message.imageSTR) {
@@ -71,7 +76,6 @@ if (sender) {
 
         let msg = document.getElementById("msg").value.trim();
         let file = document.getElementById("document").files[0];
-        let receiver = document.getElementById("receiver").value.trim();
 
         if (!msg && !file) return; // prevent blank submissions
 
@@ -112,7 +116,6 @@ if (sender) {
             // Reset form after successful handling
             document.getElementById("msg").value = "";
             form.reset();
-            document.getElementById("receiver").value = receiver; // Keep the receiver field intact
             document.getElementById('file-name').textContent = "No file chosen"; // Clear file name display
         } catch (error) {
             console.error("Error handling form submission:", error);
@@ -123,6 +126,7 @@ if (sender) {
     const logout = document.getElementById("logout");
     logout.addEventListener("click", () => {
         localStorage.removeItem("user");
+        localStorage.removeItem("receiver");
         socket.disconnect(() => {
             console.log("Disconnected from the server");
         });

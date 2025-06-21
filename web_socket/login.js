@@ -25,7 +25,7 @@ document.querySelector('form').addEventListener('submit', async function (event)
             let data = await response.json();
             console.log('Login successful:', data);
             localStorage.setItem("user", data.user);
-            window.location.href = 'index.html'; // Redirect to dashboard or another page
+            window.location.href = 'users.html'; // Redirect to dashboard or another page
         }
     } catch (err) {
         console.error('Error during login:', err);

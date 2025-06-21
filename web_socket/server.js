@@ -27,8 +27,16 @@ const io = new Server(http_server, {
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
-app.get("/", (req, res) => {
-    res.send("hello world");
+app.get("/users/:sender", async (req, res) => {
+    try {
+        console.log("Get users request received for sender:", req.params.sender);
+        let {rows} = await pool.query("select id, email from chatting where email <> $1", [req.params.sender]);
+        console.log("user: ", rows);
+        res.status(200).json({message: rows});
+    } catch(err) {
+        console.error(err.message);
+        res.status(500).json({message: "Internal server error"});
+    }
 });
 
 app.post("/login", async (req, res) => {
@@ -38,7 +46,7 @@ app.post("/login", async (req, res) => {
         return res.status(400).json({ message: "Email and password are required" });
     }
     try {
-        const query = "SELECT email FROM users WHERE email = $1 AND password = $2";
+        const query = "SELECT email FROM chatting WHERE email = $1 AND password = $2";
         const values = [email, password];
         const result = await pool.query(query, values);
         if (result.rows.length > 0) {
@@ -72,7 +80,7 @@ io.on('connection', (socket) => {
     });
 
     // Server Accepting data for log event emit from the client
-    socket.on("message", (...args) => {
+    socket.on("message", async (...args) => {
         console.log(args);
         // Server emiting data on reply event
         const { sender, msg, imageSTR, receiver } = args[0];
@@ -87,6 +95,10 @@ io.on('connection', (socket) => {
             // Optionally, you can store the message for later delivery
             return;
         }
+        await pool.query(
+            "INSERT INTO messages (sender_email, message, receiver_email, state) VALUES ($1, $2, $3, $4)",
+            [sender, msg, receiver, "sent"]
+        )
         io.to(users[receiver]).emit("reply", { sender, msg, imageSTR });
     });
 

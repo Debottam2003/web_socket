@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Chat</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #111b21;
+            margin: 0;
+            padding: 0;
+        }
+        #users {
+            width: 90%;
+            margin: 40px auto;
+            background: #222e35;
+            border-radius: 12px;
+            padding: 24px 32px;
+            gap: 16px;
+        }
+        #users > div {
+            background: #202c33;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            padding: 14px 18px;
+            border-left: 4px solid #25d366;
+            filter: drop-shadow(0 2px 4px rgb(24, 192, 144));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #users div:hover {
+            background: #2a3942;
+        }
+        #users p {
+            margin: 0;
+            color: #e9edef;
+            font-size: 1.1em;
+            letter-spacing: 0.02em;
+        }
+        #icon {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #25d366;
+            color: white;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .users-email {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="users"></div>
+    <script>
+        let sender = localStorage.getItem("user");
+        if (!sender) {
+            alert("You must be logged in to view this page.");
+            window.location.href = "login.html";
+        }
+        async function fetchUsers() {
+            try{
+                let response = await fetch(`http://localhost:3333/users/${sender}`);
+                if(!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                else {
+                    let data = await response.json();
+                    let usersDiv = document.getElementById("users");
+                    let users = data.message;
+                    users.forEach(user => {
+                        let userDiv = document.createElement("div");
+                        userDiv.innerHTML = `<div><p><span id="icon">${user.email[0]}</span> ${user.email}</p></div><button class="chat-btn" id=${user.email}>Start Chat</button>`;
+                        userDiv.id = user.email;
+                        userDiv.classList.add("users-email");
+                        usersDiv.appendChild(userDiv);
+                    });
+
+                    let chat_buttons = document.querySelectorAll(".chat-btn");
+                    chat_buttons.forEach(button => {
+                        button.addEventListener("click", function() {
+                            let receiver = this.id;
+                            localStorage.setItem("receiver", receiver);
+                            window.location.href = "./index.html";
+                        });
+                    });
+                }
+            } catch(err) {
+                console.error("There was a problem with the fetch operation:", err);
+                return;
+            }
+        }
+        fetchUsers();
+    </script>
+</body>
+</html>
