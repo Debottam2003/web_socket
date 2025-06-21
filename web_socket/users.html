@@ -65,9 +65,13 @@
             font-size: 0.9em;
             margin-left: 10px;
         }
+        h1 {
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <h1 id="username">UserName</h1>
     <div id="users"></div>
     <script>
         let sender = localStorage.getItem("user");
@@ -75,6 +79,8 @@
             alert("You must be logged in to view this page.");
             window.location.href = "login.html";
         }
+        else {
+        document.getElementById("username").innerText = `YOU: ${sender}`;
         async function fetchUsers() {
             try{
                 let response = await fetch(`http://localhost:3333/users/${sender}`);
@@ -108,6 +114,7 @@
             }
         }
         fetchUsers();
+    }
     </script>
 </body>
 </html>
