@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     imageDiv.appendChild(image);
                     chatting_area.appendChild(imageDiv);
 
-                    // Read file as array buffer
+                    // Read file as base64string
                     const imageSTR = await readFileAsbase64string(file);
                     console.log(imageSTR);
 
