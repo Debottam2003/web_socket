@@ -86,6 +86,7 @@ io.on('connection', (socket) => {
         const { sender, msg, imageSTR, receiver } = args[0];
         users[sender] = socket.id;
         console.log(users);
+        console.log(msg);
         console.log("Buffer Object:", imageSTR);
         // console.log(imageSTR, msg);
         // socket.broadcast.emit("reply", msg);

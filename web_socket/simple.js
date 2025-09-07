@@ -37,15 +37,6 @@ if (sender && receiver) {
     // Display reply from server
     socket.on("reply", (message) => {
         console.log(message);
-        if (message.msg) {
-            const new_msg = document.createElement("h3");
-            new_msg.textContent = message.msg;
-            new_msg.classList.add("incoming-msg");
-            chatting_area.appendChild(new_msg);
-            
-            //*** Scroll to the bottom of the chat area
-            chatting_area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-        }
         if (message.imageSTR) {
             // Convert the received ArrayBuffer to Uint8Array for better view
             console.log("Received byteArray:", new Uint8Array(message.imageSTR));
@@ -59,13 +50,21 @@ if (sender && receiver) {
             image.src = imgUrl;
 
             imageDiv.appendChild(image);
-            chatting_area.appendChild(imageDiv);
 
             image.onload = () => {
                 chatting_area.appendChild(imageDiv);
                 chatting_area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
             };
 
+        }
+        if (message.msg) {
+            const new_msg = document.createElement("h3");
+            new_msg.textContent = message.msg;
+            new_msg.classList.add("incoming-msg");
+            chatting_area.appendChild(new_msg);
+
+            //*** Scroll to the bottom of the chat area
+            chatting_area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
         }
     });
 
