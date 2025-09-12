@@ -80,7 +80,7 @@ app.post("/login", async (req, res) => {
             }
         } else {
             await pool.query("insert into chatusers(email, password) values( $1, $2)", [email, password]);
-            res.status(200).json({ message: "Login successful", email });
+            res.status(200).json({ message: "Login successful", user: email });
         }
     } catch (error) {
         console.error("Error during login:", error);
