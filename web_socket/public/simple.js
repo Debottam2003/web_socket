@@ -129,11 +129,11 @@ if (sender && receiver) {
         socket.disconnect(() => {
             console.log("Disconnected from the server");
         });
-        window.location.href = "login.html";
+        window.location.href = "/";
     });
 
 }
 else {
-    window.location.href = "./login.html";
+    window.location.href = "/";
 }
 

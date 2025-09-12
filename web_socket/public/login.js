@@ -1,3 +1,8 @@
+let sender = localStorage.getItem("user");
+if (sender) {
+    window.location.href = "/users";
+}
+
 document.querySelector('form').addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent the form from submitting normally
 
@@ -19,13 +24,14 @@ document.querySelector('form').addEventListener('submit', async function (event)
 
         if (!response.ok || response.status !== 200) {
             console.error('Login failed');
+            alert("Login Failed.");
             return;
         }
         else {
             let data = await response.json();
             console.log('Login successful:', data);
             localStorage.setItem("user", data.user);
-            window.location.href = 'users.html'; // Redirect to dashboard or another page
+            window.location.href = '/users'; // Redirect to dashboard or another page
         }
     } catch (err) {
         console.error('Error during login:', err);

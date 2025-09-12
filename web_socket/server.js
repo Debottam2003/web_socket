@@ -3,10 +3,19 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import pool from "./db.js"; // Assuming db.js is in the same directory
+import { fileURLToPath } from 'url';
+import path from "path";
 
 let users = {};
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+// console.log(import.meta);
+console.log(__filename);
+const __dirname = path.dirname(__filename);
+console.log(__dirname);
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors({
     origin: "*", // Adjust this to your frontend URL
@@ -27,15 +36,27 @@ const io = new Server(http_server, {
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/users', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
+});
+
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
+
 app.get("/users/:sender", async (req, res) => {
     try {
         console.log("Get users request received for sender:", req.params.sender);
-        let {rows} = await pool.query("select id, email from chatting where email <> $1", [req.params.sender]);
+        let { rows } = await pool.query("select id, email from chatusers where email <> $1", [req.params.sender]);
         console.log("user: ", rows);
-        res.status(200).json({message: rows});
-    } catch(err) {
+        res.status(200).json({ message: rows });
+    } catch (err) {
         console.error(err.message);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 
@@ -46,15 +67,20 @@ app.post("/login", async (req, res) => {
         return res.status(400).json({ message: "Email and password are required" });
     }
     try {
-        const query = "SELECT email FROM chatting WHERE email = $1 AND password = $2";
-        const values = [email, password];
+        const query = "SELECT email, password FROM chatusers WHERE email = $1";
+        const values = [email];
         const result = await pool.query(query, values);
         if (result.rows.length > 0) {
-            const user = result.rows[0].email;
-            console.log(user);
-            res.status(200).json({ message: "Login successful", user });
+            if (result.rows[0].password === password) {
+                const user = result.rows[0].email;
+                console.log(user);
+                res.status(200).json({ message: "Login successful", user });
+            } else {
+                res.status(401).json({ message: "Invalid credentials" });
+            }
         } else {
-            res.status(401).json({ message: "Invalid email or password" });
+            await pool.query("insert into chatusers(email, password) values( $1, $2)", [email, password]);
+            res.status(200).json({ message: "Login successful", email });
         }
     } catch (error) {
         console.error("Error during login:", error);
@@ -90,16 +116,16 @@ io.on('connection', (socket) => {
         console.log("Buffer Object:", imageSTR);
         // console.log(imageSTR, msg);
         // socket.broadcast.emit("reply", msg);
-        if(!users[receiver]) {
+        if (!users[receiver]) {
             console.log(`User ${receiver} is not connected yet.`);
             socket.emit("receiverNotFound", `User ${receiver} is not connected.`);
             // Optionally, you can store the message for later delivery
             return;
         }
-        await pool.query(
-            "INSERT INTO messages (sender_email, message, receiver_email, state) VALUES ($1, $2, $3, $4)",
-            [sender, msg, receiver, "sent"]
-        )
+        // await pool.query(
+        //     "INSERT INTO messages (sender_email, message, receiver_email, state) VALUES ($1, $2, $3, $4)",
+        //     [sender, msg, receiver, "sent"]
+        // )
         io.to(users[receiver]).emit("reply", { sender, msg, imageSTR });
     });
 
@@ -130,8 +156,6 @@ io.on('connection', (socket) => {
             }
         }
     });
-
-
 });
 
 http_server.listen(3333, (req, res) => {
