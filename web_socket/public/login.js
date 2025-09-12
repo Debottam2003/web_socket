@@ -14,7 +14,7 @@ document.querySelector('form').addEventListener('submit', async function (event)
     console.log('Password:', password);
 
     try {
-        let response = await fetch('http://localhost:3333/login', {
+        let response = await fetch('https://web-socket-gykr.onrender.com/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

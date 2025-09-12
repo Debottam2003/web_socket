@@ -11,7 +11,7 @@ if (sender && receiver) {
 
     const chatting_area = document.getElementById("chatting_area");
     const form = document.querySelector("form");
-    const socket = io("http://localhost:3333", {
+    const socket = io("https://web-socket-gykr.onrender.com/", {
         query: { sender: sender }
     });
 

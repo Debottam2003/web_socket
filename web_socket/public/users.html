@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="./let's_chat.png" />
+    <link rel="icon" href="/let's_chat.png" />
     <title>Let's Chat</title>
     <style>
       body {
@@ -83,7 +83,9 @@
         document.getElementById("username").innerText = `YOU: ${sender}`;
         async function fetchUsers() {
           try {
-            let response = await fetch(`http://localhost:3333/users/${sender}`);
+            let response = await fetch(
+              `https://web-socket-gykr.onrender.com/users/${sender}`
+            );
             if (!response.ok) {
               throw new Error("Network response was not ok");
             } else {
